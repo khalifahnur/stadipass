@@ -1,29 +1,28 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useEffect, useState, type FormEvent } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
-  X,
   Search,
+  ShieldCheck,
+  LogOut,
+  X,
+  ArrowRight,
+  ArrowLeft,
+  Calendar,
+  Ticket,
+  Heart,
+  Sparkles,
   Trophy,
   Music,
-  Ticket,
   MapPin,
-  ChevronRight,
-  ShieldCheck,
   HelpCircle,
-  Smartphone,
-  Globe,
-  LogOut,
-  ArrowRight,
-  Sparkles,
-  Heart,
-  Star,
-  CheckCircle2,
-  Tag
-} from 'lucide-react';
-import { FooterModalType } from './FooterModal';
-import { User } from '@/types';
+  BookOpen,
+} from "lucide-react";
+import { Logo } from "./Logo";
+import { User, EventItem } from "@/types";
+import Image from "next/image";
+import Link from "next/link";
 
-interface MegaMenuProps {
+export interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   selectedCategory: string | null;
@@ -31,377 +30,373 @@ interface MegaMenuProps {
   currentUser: User | null;
   onOpenAuth: () => void;
   onSignOut: () => void;
-  onOpenModal: (modal: FooterModalType) => void;
-  currency: string;
-  searchQuery: string;
-  onSearch: (query: string) => void;
+  onLogoClick?: () => void;
+  onSearchClick?: () => void;
+  onFavoritesClick?: () => void;
+  onCalendarClick?: () => void;
+  onContactClick?: () => void;
+  onTicketsClick?: () => void;
   likedCount?: number;
+  onOpenModal?: (modal: any) => void;
+  currency?: string;
+  searchQuery?: string;
+  onSearch?: (query: string) => void;
+  events?: EventItem[];
+  formatPrice?: (usd: number) => string;
 }
 
-export function MobileMenu(props: MegaMenuProps) {
-  return <MegaMenu {...props} />;
-}
+type MenuSubView = "main" | "services" | "sites" | "about" | "resources";
 
-export function MegaMenu({
+export function MobileMenu({
   isOpen,
   onClose,
-
+  selectedCategory,
+  onSelectCategory,
   currentUser,
   onOpenAuth,
   onSignOut,
-  onOpenModal,
-  currency,
-
+  onLogoClick,
+  onSearchClick,
+  onFavoritesClick,
+  onCalendarClick,
+  onContactClick,
+  onTicketsClick,
   likedCount = 0,
-}: MegaMenuProps) {
+  onOpenModal,
+  currency = "USD",
+  searchQuery = "",
+  onSearch,
+  events = [],
+  formatPrice,
+}: MobileMenuProps) {
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [activeView, setActiveView] = useState<MenuSubView>("main");
 
-  const [activeSection, setActiveSection] = useState<'sports' | 'concerts' | 'shows' | 'cities'>('sports');
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
 
-
-
-  // Lock body scroll when menu is active
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
+      setActiveView("main");
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
+      setActiveView("main");
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
-  const handleSearchSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    // onSearch(localSearch);
-    onClose();
-  };
 
-  const navCategories = [
+
+
+
+
+
+
+
+  const mainNavItems = [
     {
-      id: 'sports' as const,
-      index: '01',
-      title: 'Sports',
-      badge: 'Live Pass',
-      highlights: [
-        'NFL Football',
-        'Premier League',
-        'NBA Basketball',
-        'Champions League',
-        'MLB Baseball',
-        'NCAA College Football'
-      ],
-      description: 'Guaranteed turnstile entry to top stadiums worldwide.',
+      id: "home",
+      label: "Home",
+      hasSubmenu: false,
+      action: () => {
+        onClose();
+        if (onLogoClick) onLogoClick();
+        else window.scrollTo({ top: 0, behavior: "smooth" });
+      },
     },
     {
-      id: 'concerts' as const,
-      index: '02',
-      title: 'Concerts',
-      badge: 'Hot Tours',
-      highlights: [
-        'Taylor Swift Eras',
-        'Coldplay World Tour',
-        'Billie Eilish',
-        'Karol G',
-        'Drake',
-        'Summer Stadium Festivals'
-      ],
-      description: 'Verified floor passes, VIP club lounges, and arena seats.',
+      id: "services",
+      label: "Services",
+      hasSubmenu: true,
+      action: () => setActiveView("services"),
     },
     {
-      id: 'shows' as const,
-      index: '03',
-      title: 'Shows',
-      badge: 'Exclusive',
-      highlights: [
-        'Broadway NYC',
-        'West End London',
-        'Stand-up Comedy',
-        'Cirque du Soleil',
-        'Las Vegas Residencies'
-      ],
-      description: 'Premium orchestra views and direct digital passes.',
+      id: "sites",
+      label: "Sites",
+      hasSubmenu: true,
+      action: () => setActiveView("sites"),
     },
     {
-      id: 'cities' as const,
-      index: '04',
-      title: 'Cities',
-      badge: 'Venues',
-      highlights: [
-        'London Stadiums',
-        'New York Venues',
-        'Chicago Soldier Field',
-        'Madrid Bernabéu',
-        'Munich Allianz Arena'
-      ],
-      description: 'Explore live event schedules mapped by international host city.',
+      id: "about",
+      label: "About",
+      hasSubmenu: true,
+      action: () => setActiveView("about"),
+    },
+    {
+      id: "resources",
+      label: "Resources",
+      hasSubmenu: true,
+      action: () => setActiveView("resources"),
+    },
+    {
+      id: "tickets",
+      label: "My Ticket",
+      hasSubmenu: false,
+      action: () => {
+        onClose();
+        if (currentUser && onTicketsClick) {
+          setTimeout(onTicketsClick, 180);
+        } else {
+          setTimeout(onOpenAuth, 180);
+        }
+      },
     },
   ];
 
+
+
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
         <motion.div
+          key="mobile-menu-wrapper"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="fixed inset-0 z-50 flex flex-col h-[100dvh] w-screen overflow-hidden font-['Barlow_Condensed',sans-serif] bg-[#0A1A36] text-white"
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-50 md:hidden select-none overflow-hidden"
+          role="dialog"
+          aria-modal="true"
         >
-          {/* Subtle Ambient Lighting Elements (Non-card, purely atmospheric) */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1B3A6B]/50 rounded-full blur-[140px] pointer-events-none -z-0" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#5AA7FF]/15 rounded-full blur-[130px] pointer-events-none -z-0" />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black backdrop-blur-[4px] z-40"
+          />
 
-          {/* Top Bar */}
-          <header className="relative z-10 flex items-center justify-between px-6 sm:px-12 py-5 border-b border-white/10 shrink-0 bg-[#0A1A36]/80 backdrop-blur-md">
-            {/* Curved Logo (White) */}
-            <div 
-
-              className="flex items-center cursor-pointer"
-            >
-              <svg viewBox="0 0 200 90" className="w-[120px] h-[52px] text-white fill-current overflow-visible">
-                <path id="curveTop-mega" d="M 20,34 Q 100,42 180,34" fill="transparent" />
-                <path id="curveBottom-mega" d="M 25,80 Q 100,72 175,80" fill="transparent" />
-                <text className="font-black text-[30px] tracking-[0.16em] uppercase select-none font-display">
-                  <textPath href="#curveTop-mega" startOffset="50%" textAnchor="middle">
-                    STADI
-                  </textPath>
-                </text>
-                <text className="font-black text-[30px] tracking-[0.24em] uppercase select-none font-display">
-                  <textPath href="#curveBottom-mega" startOffset="50%" textAnchor="middle">
-                    PASS
-                  </textPath>
-                </text>
-              </svg>
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-0 left-0 w-full h-15  bg-textured z-50 px-3 sm:px-6 flex items-center justify-between "
+          >
+            <div className="flex items-center">
+              <Link
+                href={"/"}
+                className="h-10 items-center justify-center flex"
+              >
+                <Image
+                  src={"/logo.png"}
+                  alt="stadipass_logo"
+                  width={150}
+                  height={100}
+                  className=" object-cover items-center justify-center"
+                />
+              </Link>
             </div>
 
-            {/* Right Controls */}
-            <div className="flex items-center gap-4">
-              {currentUser ? (
-                <div className="hidden sm:flex items-center gap-3 pr-4 border-r border-white/15 text-sm">
-                  <span className="text-white/60 uppercase tracking-wider font-semibold">Account:</span>
-                  <span className="font-bold text-[#5AA7FF]">{currentUser.name}</span>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenAuth();
-                  }}
-                  className="text-xs uppercase font-black tracking-widest text-[#5AA7FF] hover:text-white transition-colors px-4 py-2 border border-[#5AA7FF]/40 rounded-full hover:border-[#5AA7FF]"
+            <div className="flex items-center">
+              <div className="relative flex items-center h-[52px] px-3 bg-secondary rounded-t-[20px] translate-y-[6px] mr-2 shadow-xs">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 100 100"
+                  className="absolute bottom-0 -left-5 w-5 h-5 pointer-events-none rotate-180"
+                  aria-hidden="true"
                 >
-                  Sign In
-                </button>
-              )}
+                  <path
+                    d="m100,0H0v100C0,44.77,44.77,0,100,0Z"
+                    fill="#00B67A"
+                  />
+                </svg>
+
+                <div className="flex items-center gap-2 border-2 border-black/90 px-2.5 py-1 rounded-full bg-secondary">
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="LinkedIn"
+                    className="text-black hover:opacity-75 transition-opacity"
+                  >
+                    <svg
+                      role="img"
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 fill-current"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    </svg>
+                  </a>
+
+                  {/* Instagram */}
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Instagram"
+                    className="text-black hover:opacity-75 transition-opacity"
+                  >
+                    <svg
+                      role="img"
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 fill-current"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
 
               <button
+                type="button"
                 onClick={onClose}
-                className="w-11 h-11 rounded-full bg-white/10 hover:bg-[#5AA7FF] text-white flex items-center justify-center transition-all active:scale-95 border border-white/15 cursor-pointer group"
-                aria-label="Close navigation menu"
+                className="flex items-center justify-center w-10 h-10 bg-primary border-2 border-black rounded-full transition-all cursor-pointer active:scale-95 shadow-xs"
+                aria-label="Close menu"
               >
-                <X className="w-6 h-6 stroke-[2.5] group-hover:rotate-90 transition-transform duration-200" />
+                <div className="relative w-5 h-5 flex items-center justify-center">
+                  <span className="absolute w-3.5 h-[2px] bg-white rotate-45 rounded-full" />
+                  <span className="absolute w-3.5 h-[2px] bg-white -rotate-45 rounded-full" />
+                </div>
               </button>
             </div>
-          </header>
+          </motion.div>
 
-          {/* Main Content Area: High-End Typographic Layout without cards */}
-          <div className="relative z-10 flex-1 overflow-y-auto px-6 sm:px-12 lg:px-16 py-8 flex flex-col justify-between max-w-[1440px] w-full mx-auto">
-            
-            {/* Search Input: Minimalist Architectural Line */}
-            <div className="mb-10 sm:mb-14">
-              <form onSubmit={handleSearchSubmit} className="relative w-full max-w-3xl">
-                <div className="flex items-center border-b-2 border-white/20 hover:border-white/50 focus-within:border-[#5AA7FF] transition-colors py-3 gap-3">
-                  <Search className="w-6 h-6 text-[#5AA7FF] shrink-0" />
-                  {/* <input
-                    type="text"
-                    value={localSearch}
-                    onChange={(e) => setLocalSearch(e.target.value)}
-                    placeholder="Search teams, performers, tours, or venues..."
-                    className="w-full bg-transparent text-xl sm:text-3xl font-bold uppercase tracking-wide text-white placeholder:text-white/30 outline-none"
-                  />
-                  {localSearch && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.98 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-[60px] left-[8px] right-[8px] bottom-[10px] bg-secondary text-black shadow-[0_25px_60px_rgba(0,0,0,0.3)] z-50 flex flex-col overflow-hidden will-change-transform"
+            style={{
+              borderRadius: "0px 0 30px 30px",
+            }}
+          >
+            <div className="h-full flex flex-col justify-between p-3.5 sm:p-5 overflow-hidden">
+              {/* <div className="shrink-0 mb-1">
+
+                <div className="text-center font-bold text-[11px] sm:text-xs uppercase tracking-wider text-black/70 mb-1.5 font-mono">
+                  Welcome to StadiPass
+                </div>
+
+
+                <form onSubmit={handleSearchSubmit} className="relative">
+                  <div className="bg-white/90 backdrop-blur-md rounded-full px-3.5 py-1.5 sm:py-2 flex items-center justify-between shadow-xs border border-black/10 focus-within:border-black transition-colors">
+                    <input
+                      type="text"
+                      value={localSearch}
+                      onChange={(e) => setLocalSearch(e.target.value)}
+                      placeholder="Search teams, concerts, venues..."
+                      className="bg-transparent text-black placeholder-black/50 text-xs sm:text-sm font-medium focus:outline-none w-full pr-2"
+                    />
+                    {localSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setLocalSearch('')}
+                        className="p-1 hover:opacity-70 text-black mr-1 cursor-pointer"
+                        aria-label="Clear search"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      aria-label="Search"
+                      className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center shrink-0 hover:bg-neutral-800 transition-colors cursor-pointer"
+                    >
+                      <Search size={13} />
+                    </button>
+                  </div>
+                </form>
+              </div> */}
+
+              <div className="flex-1 flex flex-col justify-center overflow-hidden my-1">
+                <motion.nav
+                  key="main-nav"
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex-1 flex flex-col justify-evenly "
+                >
+                  {mainNavItems.map((item, idx) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.03 * idx, duration: 0.2 }}
+                      className="border-b border-black/25 py-1 sm:py-1.5"
+                    >
+                      <button
+                        type="button"
+                        onClick={item.action}
+                        className="group w-full py-1 text-left flex items-center justify-between text-[22px] sm:text-[26px] font-bold text-black hover:text-[#005241] tracking-tight transition-colors cursor-pointer font-sans"
+                      >
+                        <span>{item.label}</span>
+
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-1"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </button>
+                    </motion.div>
+                  ))}
+                </motion.nav>
+              </div>
+
+              <div className="shrink-0 pt-2 space-y-2 ">
+                {currentUser ? (
+                  <div className="bg-black/10 border border-black/15 rounded-xl p-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
+                        {currentUser.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-black">
+                          {currentUser.name}
+                        </div>
+                        <div className="text-[10px] text-black/60 truncate max-w-[140px]">
+                          {currentUser.email}
+                        </div>
+                      </div>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
-                        setLocalSearch('');
-                        onSearch('');
+                        onSignOut();
+                        onClose();
                       }}
-                      className="text-white/50 hover:text-white p-1"
+                      className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-black/25 text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
                     >
-                      <X className="w-5 h-5" />
+                      <LogOut size={12} />
+                      <span>Sign out</span>
                     </button>
-                  )} */}
+                  </div>
+                ) : (
                   <button
-                    type="submit"
-                    className="px-6 py-2 bg-[#5AA7FF] hover:bg-[#4693e6] text-white text-sm font-black uppercase tracking-wider rounded-full transition-all shrink-0"
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      setTimeout(onOpenAuth, 180);
+                    }}
+                    className="w-full bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-bold text-xs sm:text-sm uppercase tracking-wider py-2.5 sm:py-3 rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer font-sans"
                   >
-                    Find Passes
+                    <span>Buy tickets</span>
                   </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Primary Navigation Columns */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 mb-12">
-              
-              {/* Left Column: Big Typographic Category Index */}
-              
-
-              {/* Right Column: Dynamic Sub-Category Exploration (Pure Typography & Clean Grid) */}
-              <div className="lg:col-span-6 lg:pl-8 lg:border-l lg:border-white/10 flex flex-col justify-between">
-                <div>
-                  <div className="text-[12px] font-black uppercase tracking-[0.25em] text-[#5AA7FF] mb-4 pb-2 border-b border-white/10 flex items-center justify-between">
-                    <span>Explore {navCategories.find((c) => c.id === activeSection)?.title}</span>
-                    <span className="text-white/40 lowercase text-xs font-normal">
-                      verified authentic inventory
-                    </span>
-                  </div>
-
-                  <p className="text-sm sm:text-base text-white/70 mb-6 font-medium max-w-lg">
-                    {navCategories.find((c) => c.id === activeSection)?.description}
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-6">
-                    {navCategories
-                      .find((c) => c.id === activeSection)
-                      ?.highlights.map((item) => (
-                        <button
-                          key={item}
-                         
-                          className="text-left text-lg sm:text-xl font-bold uppercase tracking-wide text-white/85 hover:text-[#5AA7FF] flex items-center justify-between py-1 group transition-colors"
-                        >
-                          <span className="group-hover:translate-x-1 transition-transform">{item}</span>
-                          <span className="text-xs text-white/30 group-hover:text-[#5AA7FF] transition-colors">↗</span>
-                        </button>
-                      ))}
-                  </div>
-                </div>
-
-                {/* VIP Services & Direct Actions Strip (Clean typographic rows) */}
-                <div className="mt-10 pt-6 border-t border-white/10 space-y-4">
-                  <div className="text-[12px] font-black uppercase tracking-[0.25em] text-[#5AA7FF]">
-                    Direct Stadium Services
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onOpenModal('sell');
-                      }}
-                      className="text-left group py-2"
-                    >
-                      <div className="text-base font-black uppercase text-white group-hover:text-[#5AA7FF] transition-colors flex items-center gap-1.5">
-                        Sell Your Tickets <span className="text-[#5AA7FF]">→</span>
-                      </div>
-                      <p className="text-xs text-white/50">0% seller commission • Verified fan payout</p>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onOpenModal('trust');
-                      }}
-                      className="text-left group py-2"
-                    >
-                      <div className="text-base font-black uppercase text-white group-hover:text-[#5AA7FF] transition-colors flex items-center gap-1.5">
-                        100% Stadi Pass Guarantee <span className="text-[#5AA7FF]">→</span>
-                      </div>
-                      <p className="text-xs text-white/50">Direct turnstile gate sync • 200% money back</p>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onOpenModal('app-download');
-                      }}
-                      className="text-left group py-2"
-                    >
-                      <div className="text-base font-black uppercase text-white group-hover:text-[#5AA7FF] transition-colors flex items-center gap-1.5">
-                        Get Stadi Pass Mobile <span className="text-[#5AA7FF]">→</span>
-                      </div>
-                      <p className="text-xs text-white/50">NFC turnstile tap • Offline rolling QR barcodes</p>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onOpenModal('help');
-                      }}
-                      className="text-left group py-2"
-                    >
-                      <div className="text-base font-black uppercase text-white group-hover:text-[#5AA7FF] transition-colors flex items-center gap-1.5">
-                        24/7 Matchday Support <span className="text-[#5AA7FF]">→</span>
-                      </div>
-                      <p className="text-xs text-white/50">Instant concierge & stadium gate assistance</p>
-                    </button>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
-
-            {/* Bottom Utility & Footer Line */}
-            <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold uppercase tracking-wider text-white/60">
-              <div className="flex flex-wrap items-center gap-6">
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenModal('language');
-                  }}
-                  className="flex items-center gap-1.5 hover:text-white transition-colors"
-                >
-                  <Globe className="w-3.5 h-3.5 text-[#5AA7FF]" /> English | {currency}
-                </button>
-
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenModal('reviews');
-                  }}
-                  className="flex items-center gap-1 hover:text-white transition-colors"
-                >
-                  <Star className="w-3.5 h-3.5 text-[#00b67a] fill-[#00b67a]" /> 4.9/5 Rated by 17k+ Fans
-                </button>
-
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenModal('about');
-                  }}
-                  className="hover:text-white transition-colors"
-                >
-                  About
-                </button>
-
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenModal('terms');
-                  }}
-                  className="hover:text-white transition-colors"
-                >
-                  Terms
-                </button>
-
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenModal('privacy');
-                  }}
-                  className="hover:text-white transition-colors"
-                >
-                  Privacy
-                </button>
-              </div>
-
-              <div className="text-white/40 tracking-normal text-[11px] font-medium">
-                © 2026 Stadi Pass Inc. Official Stadium Access Hardware Integration.
-              </div>
-            </div>
-
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
+
+export { MobileMenu as MegaMenu };

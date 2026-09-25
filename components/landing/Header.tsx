@@ -104,18 +104,21 @@ export function Header({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="bg-[#111827] hover:bg-black text-white px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-all shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] cursor-pointer font-sans"
+                className="bg-[#111827] hidden md:block hover:bg-black text-white px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-all shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] cursor-pointer font-sans"
               >
                 Buy tickets
               </button>
             )}
             <button
-              onClick={onOpenMenu}
-              className="md:hidden p-2 sm:p-2.5 text-[#111827] rounded-full hover:bg-[#F0FDF4] transition-all cursor-pointer border border-gray-200 hover:border-[#BBF7D0] flex items-center justify-center"
-              aria-label="Open menu"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+  onClick={onOpenMenu}
+  className="relative flex flex-col justify-center items-center w-10 h-10 gap-1.5 md:hidden"
+  aria-label="Open menu"
+>
+  <span className="w-6 h-0.5 bg-gray-900 rounded-full transition-all"></span>
+  <span className="w-6 h-0.5 bg-gray-900 rounded-full transition-all"></span>
+  <span className="w-6 h-0.5 bg-gray-900 rounded-full transition-all"></span>
+</button>
+            {/* <div className="-mr-1.6rem ml-0.8rem !block before:w-2.4rem after:w-2.4rem sm:ml-1.6rem sm:before:w-3.2rem sm:after:w-3.2rem md:!hidden Burger-module__KJXFwG__wrap "></div> */}
           </div>
         </div>
       </div>
